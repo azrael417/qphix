@@ -602,6 +602,8 @@ PACKAGE_BUGREPORT='bjoo@jlab.org'
 
 ac_subst_vars='LTLIBOBJS
 LIB@&t@OBJS
+QPHIX_MPI_SINGLESIDED_FALSE
+QPHIX_MPI_SINGLESIDED_TRUE
 QPHIX_BUILD_QPX_FALSE
 QPHIX_BUILD_QPX_TRUE
 QPHIX_BUILD_CLOVER_FALSE
@@ -5265,6 +5267,7 @@ $as_echo "$as_me: Not Building Clover Term" >&6;}
 fi
 
 build_qpx="no"
+singlesided_mpi="no"
 
 case ${proc} in
 AVX|avx) 
@@ -5379,6 +5382,14 @@ fi
 else
   QPHIX_BUILD_QPX_TRUE='#'
   QPHIX_BUILD_QPX_FALSE=
+fi
+
+ if  test "x${singlesided_mpi}x" = "xyesx"; then
+  QPHIX_MPI_SINGLESIDED_TRUE=
+  QPHIX_MPI_SINGLESIDED_FALSE='#'
+else
+  QPHIX_MPI_SINGLESIDED_TRUE='#'
+  QPHIX_MPI_SINGLESIDED_FALSE=
 fi
 
 
@@ -5552,6 +5563,13 @@ if test -z "${QPHIX_BUILD_QPX_TRUE}" && test -z "${QPHIX_BUILD_QPX_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_BUILD_QPX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"QPHIX_BUILD_QPX\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${QPHIX_MPI_SINGLESIDED_TRUE}" && test -z "${QPHIX_MPI_SINGLESIDED_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_MPI_SINGLESIDED\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"QPHIX_MPI_SINGLESIDED\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi

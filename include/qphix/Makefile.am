@@ -9,7 +9,6 @@ qphix_include_HEADERS= \
 qphix_include_HEADERS += \
 	./abs_solver.h \
 	./geometry.h \
-	./comm.h \
 	./dslash_def.h \
 	./dslash_body.h \
 	./dslash_generated.h \
@@ -32,6 +31,11 @@ qphix_include_HEADERS += \
 	./print_utils.h \
 	./threadbind.h
 
+if QPHIX_MPI_SINGLESIDED
+qphix_include_HEADERS += ./comm_ss.h
+else
+qphix_include_HEADERS += ./comm.h
+endif
 
 #
 # not used currently: blas.h blas_c.h blas_mic.h

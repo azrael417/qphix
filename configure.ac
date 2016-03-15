@@ -364,6 +364,7 @@ else
 fi
 
 build_qpx="no"
+singlesided_mpi="no"
 
 case ${proc} in
 AVX|avx) 
@@ -414,6 +415,7 @@ esac
 
 AM_CONDITIONAL(QPHIX_BUILD_CLOVER, [ test "x${build_clover}x" = "xyesx" ])
 AM_CONDITIONAL(QPHIX_BUILD_QPX, [ test "x${build_qpx}x" = "xyesx"])
+AM_CONDITIONAL(QPHIX_MPI_SINGLESIDED, [ test "x${singlesided_mpi}x" = "xyesx"])
 
 dnl dnl produce output
 AC_CONFIG_FILES(Makefile)
