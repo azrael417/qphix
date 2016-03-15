@@ -1384,7 +1384,7 @@ Optional Features:
   --enable-openmp         Enable building of OpenMP dispatcher. Pass flags
                           necessary for OpenMP on CFLAGS
   --enable-proc=proc      Build code specializations for proc.
-                          proc=NONE,SSE,AVX,MIC
+                          proc=NONE,SSE,AVX,AVX2,MIC
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -5288,6 +5288,27 @@ $as_echo "$as_me: error: Cannot have SOALEN more than 8 for AVX" >&2;}
    { (exit 1); exit 1; }; };
 	fi		       	    
 ;;
+AVX2|avx2) 
+	
+cat >>confdefs.h <<\_ACEOF
+@%:@define QPHIX_AVX2_SOURCE 1
+_ACEOF
+
+	
+cat >>confdefs.h <<\_ACEOF
+@%:@define QPHIX_LLC_CACHE_ALIGN 64
+_ACEOF
+
+
+	{ $as_echo "$as_me:$LINENO: Configuring AVX2 Specializations " >&5
+$as_echo "$as_me: Configuring AVX2 Specializations " >&6;}
+	if test $SOALEN -gt 8;
+	then 
+	  { { $as_echo "$as_me:$LINENO: error: Cannot have SOALEN more than 8 for AVX2" >&5
+$as_echo "$as_me: error: Cannot have SOALEN more than 8 for AVX2" >&2;}
+   { (exit 1); exit 1; }; };
+	fi		       	    
+;;
 MIC|mic)
 	
 cat >>confdefs.h <<\_ACEOF
@@ -5364,6 +5385,18 @@ fi
 ac_config_files="$ac_config_files Makefile"
 
 ac_config_files="$ac_config_files include/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/avx/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/avx2/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/mic/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/scalar/Makefile"
+
+ac_config_files="$ac_config_files include/qphix/qpx/Makefile"
 
 ac_config_files="$ac_config_files lib/Makefile"
 
@@ -6034,6 +6067,12 @@ do
     "include/qphix/qphix_config_internal.h") CONFIG_HEADERS="$CONFIG_HEADERS include/qphix/qphix_config_internal.h" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "include/Makefile") CONFIG_FILES="$CONFIG_FILES include/Makefile" ;;
+    "include/qphix/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/Makefile" ;;
+    "include/qphix/avx/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/avx/Makefile" ;;
+    "include/qphix/avx2/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/avx2/Makefile" ;;
+    "include/qphix/mic/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/mic/Makefile" ;;
+    "include/qphix/scalar/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/scalar/Makefile" ;;
+    "include/qphix/qpx/Makefile") CONFIG_FILES="$CONFIG_FILES include/qphix/qpx/Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "tests/Makefile") CONFIG_FILES="$CONFIG_FILES tests/Makefile" ;;
 
