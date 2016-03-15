@@ -18,6 +18,11 @@ namespace QPhiX
 	public:
 		Comms(Geometry<T,V,S,compressP>* geom)  
 		{
+			//get the underlying QMP communicator
+			MPI_Comm* mpi_base_comm;
+			QMP_get_hidden_comm(QMP_comm_get_default(),reinterpret_cast<void**>(&mpi_base_comm));
+			
+			
 			// Deal with the faces
 			NFaceDir[0] = (geom->Ny() * geom->Nz() * geom->Nt())/2;
 			NFaceDir[1] = (geom->Nx() * geom->Nz() * geom->Nt())/2;
@@ -144,7 +149,7 @@ namespace QPhiX
 
 		inline void startSendDir(int d) {
 			/* **** MPI HERE ******* */
-			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, MPI_COMM_WORLD, &reqSendToDir[d] ) != MPI_SUCCESS ) { 
+			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, *mpi_base_comm, &reqSendToDir[d] ) != MPI_SUCCESS ) { 
 				QMP_error("Failed to start send in forward T direction\n");
 				QMP_abort(1);
 			}
@@ -168,7 +173,7 @@ namespace QPhiX
 
 		inline void startRecvFromDir(int d) { 
 			/* **** MPI HERE ******* */
-			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, MPI_COMM_WORLD, &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
+			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, *mpi_base_comm, &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
 				QMP_error("Recv from dir failed\n");
 				QMP_abort(1);
 			}
@@ -191,7 +196,7 @@ namespace QPhiX
 
 		inline void progressComms() {
 			int flag = 0;
-			MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, MPI_STATUS_IGNORE);
+			MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, *mpi_base_comm, &flag, MPI_STATUS_IGNORE);
 		}
 
 		inline   bool localX() const { return localDir_[0]; }
@@ -250,6 +255,7 @@ namespace QPhiX
 			
 			//some global variables
 			MPI_Comm mpi_comm_tmp;
+			int key, color, ldim, lcoord;
 			
 			//get logical coordinates
 			const int* logical_dimensions = QMP_get_logical_dimensions();
@@ -258,15 +264,15 @@ namespace QPhiX
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
 					//get some params:
-					int ldim=logical_dimensions[d];
-					int lcoord=logical_coordinates[d];
+					ldim=logical_dimensions[d];
+					lcoord=logical_coordinates[d];
 					
 					//key is simply my rank
-					int key=myRank;
+					key=myRank;
 					
 					
 					//even first
-					int color=(lcoord%2==0 ? lcoord/2 : ((lcoord+ldim-1)%ldim)/2);
+					color=(lcoord%2==0 ? lcoord/2 : ((lcoord+ldim-1)%ldim)/2);
 
 					MPI_Comm_split(*mpi_base_comm, color, key, &mpi_comm_tmp);
 						
@@ -282,7 +288,7 @@ namespace QPhiX
 					
 					
 					//odd comes next
-					int color=(lcoord%2==1 ? ((lcoord+1)%ldim)/2 : lcoord/2);
+					color=(lcoord%2==1 ? ((lcoord+1)%ldim)/2 : lcoord/2);
 					
 					MPI_Comm_split(*mpi_base_comm, color, key, &mpi_comm_tmp);
 					
