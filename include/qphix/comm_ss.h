@@ -83,32 +83,12 @@ namespace QPhiX
 					sendToDir[2*d+1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					recvFromDir[2*d+0] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					recvFromDir[2*d+1] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-	  
-					msgmem_sendToDir[2*d+0] = QMP_declare_msgmem(sendToDir[2*d+0], faceInBytes[d]);
-					msgmem_sendToDir[2*d+1] = QMP_declare_msgmem(sendToDir[2*d+1], faceInBytes[d]);
-					msgmem_recvFromDir[2*d+0] = QMP_declare_msgmem(recvFromDir[2*d+0], faceInBytes[d]);
-					msgmem_recvFromDir[2*d+1] = QMP_declare_msgmem(recvFromDir[2*d+1], faceInBytes[d]);
-	  
-					mh_sendToDir[2*d+1] = QMP_declare_send_to(msgmem_sendToDir[2*d+1], myNeighboursInDir[2*d+1], 0);
-					mh_recvFromDir[2*d+0] = QMP_declare_receive_from(msgmem_recvFromDir[2*d+0], myNeighboursInDir[2*d+0], 0);		
-					mh_sendToDir[2*d+0] = QMP_declare_send_to(msgmem_sendToDir[2*d+0], myNeighboursInDir[2*d+0], 0);
-					mh_recvFromDir[2*d+1] = QMP_declare_receive_from(msgmem_recvFromDir[2*d+1], myNeighboursInDir[2*d+1], 0);
 				}
 				else {
 					sendToDir[2*d+0]   = NULL;
 					sendToDir[2*d+1]   = NULL;
 					recvFromDir[2*d+0] = NULL;
 					recvFromDir[2*d+1] = NULL;
-
-					msgmem_sendToDir[2*d+0] = NULL;
-					msgmem_sendToDir[2*d+1] = NULL;
-					msgmem_recvFromDir[2*d+0] = NULL;
-					msgmem_recvFromDir[2*d+1] = NULL;
-	  
-					mh_sendToDir[2*d+1] = NULL;
-					mh_recvFromDir[2*d+0] = NULL;
-					mh_sendToDir[2*d+0] = NULL;
-					mh_recvFromDir[2*d+1] = NULL;
 				}
 			} // End loop over dir
       
@@ -149,7 +129,7 @@ namespace QPhiX
 
 		inline void startSendDir(int d) {
 			/* **** MPI HERE ******* */
-			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, *mpi_base_comm, &reqSendToDir[d] ) != MPI_SUCCESS ) { 
+			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, commDir[d], &reqSendToDir[d] ) != MPI_SUCCESS ) { 
 				QMP_error("Failed to start send in forward T direction\n");
 				QMP_abort(1);
 			}
@@ -173,7 +153,7 @@ namespace QPhiX
 
 		inline void startRecvFromDir(int d) { 
 			/* **** MPI HERE ******* */
-			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, *mpi_base_comm, &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
+			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, commDir[d], &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
 				QMP_error("Recv from dir failed\n");
 				QMP_abort(1);
 			}
