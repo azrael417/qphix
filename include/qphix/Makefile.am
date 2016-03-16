@@ -35,7 +35,7 @@ qphix_include_HEADERS += \
 # not used currently: blas.h blas_c.h blas_mic.h
 #
 
-if QPHIX_USE_SINGLE_SIDED_COMMS
+if QPHIX_INCLUDE_SINGLE_SIDED_COMMS
 qphix_include_HEADERS += comm_ss.h
 else
 qphix_include_HEADERS += comm.h

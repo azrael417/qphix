@@ -5,6 +5,8 @@
 #include <mpi.h>
 
 
+#warning "Using single sided communications"
+
 namespace QPhiX
 {
 

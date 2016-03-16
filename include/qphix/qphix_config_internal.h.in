@@ -63,5 +63,8 @@
 /* MM_MALLOC is on */
 #undef QPHIX_USE_MM_MALLOC
 
+/* Switching to Single-Sided-Comms */
+#undef QPHIX_USE_SINGLE_SIDED_COMMS
+
 /* Version number of package */
 #undef VERSION

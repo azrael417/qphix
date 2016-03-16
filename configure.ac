@@ -364,6 +364,7 @@ yes)
 	AC_MSG_NOTICE([ Regular QMP COMMS ])
  	AC_DEFINE_UNQUOTED(QPHIX_DO_COMMS,[1], [Do the actual comms])
    	AC_DEFINE_UNQUOTED(QPHIX_QMP_COMMS,[1], [QMP Comms])
+	AC_DEFINE([QPHIX_USE_SINGLE_SIDED_COMMS],[1], [ Switching to Single-Sided-Comms ])
 	;;
 *)
 	AC_MSG_NOTICE([Not using single-sided-communications.])
@@ -373,7 +374,7 @@ esac
 AM_CONDITIONAL([QPHIX_SCALAR], [ test "X${PARALLEL_ARCH}X" == "XscalarX" ] )
 AM_CONDITIONAL([QPHIX_PARSCALAR], [ test "X${PARALLEL_ARCH}X" == "XparscalarX" ] )
 AM_CONDITIONAL([QPHIX_BUILD_WITH_QDP], [ test "X${QDPXX_GIVEN}X" == "XyesX" ])
-AM_CONDITIONAL([QPHIX_USE_SINGLE_SIDED_COMMS], [ test "X${USE_SINGLE_SIDED_COMMS}X" == "XyesX" ])
+AM_CONDITIONAL([QPHIX_INCLUDE_SINGLE_SIDED_COMMS], [ test "X${USE_SINGLE_SIDED_COMMS}X" == "XyesX" ])
 
 if test "x${build_clover}x" == "xyesx";
 then
