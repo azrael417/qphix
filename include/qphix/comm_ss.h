@@ -75,10 +75,12 @@ namespace QPhiX
 				}
 			}
 			totalBufSize *= 4; // 2 bufs for sends & 2 for recvs
-      
+      	  
+		  	//init communicators, windows and buffers
+		  	initComms();
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
-					MPI_info info;
+					MPI_Info info;
 					//sendToDir[2*d+0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+0], reinterpret_cast<void*>(sendToDir[2*d+0]), winSendToDir[2*d+0]);
 					//sendToDir[2*d+1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
@@ -119,7 +121,6 @@ namespace QPhiX
 					numNonLocalDir_++;
 				}
 			}
-    		initComms();
       
 		}
 
