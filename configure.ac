@@ -29,6 +29,13 @@ AC_ARG_ENABLE(testing,
    [Enable make check to automatically run tests, rather than just build them]),   [ do_tests="${enableval}" ]
 )
 
+AC_ARG_ENABLE(single-sided-comms,
+   AC_HELP_STRING([--enable-single-sided-comms],
+   [Enable for using single-sided communication (requires QMP build with MPI > 3.0)]),   
+   [ USE_SINGLE_SIDED_COMMS="${enableval}" ],
+   [ USE_SINGLE_SIDED_COMMS="no" ]
+)
+
 AC_ARG_ENABLE(soalen,
    AC_HELP_STRING([--enable-soalen=N],
      [Build using SOALEN=N where N=4,8,16 for MIC N=4,8 for AVX]),
@@ -351,6 +358,16 @@ yes)
 	;;
 esac
 
+case ${USE_SINGLE_SIDED_COMMS} in
+yes) 
+	AC_MSG_NOTICE([Enabling single-sided-communication])
+	AC_DEFINE_UNQUOTED(QPHIX_USE_SINGLE_SIDED_COMMS,[1], [SINGLESIDEDCOMMS is on])
+	;;
+*)
+	AC_MSG_NOTICE([Not using single-sided-communications.])
+	;;
+esac
+
 AM_CONDITIONAL([QPHIX_SCALAR], [ test "X${PARALLEL_ARCH}X" == "XscalarX" ] )
 AM_CONDITIONAL([QPHIX_PARSCALAR], [ test "X${PARALLEL_ARCH}X" == "XparscalarX" ] )
 AM_CONDITIONAL([QPHIX_BUILD_WITH_QDP], [ test "X${QDPXX_GIVEN}X" == "XyesX" ])
@@ -415,7 +432,7 @@ esac
 
 AM_CONDITIONAL(QPHIX_BUILD_CLOVER, [ test "x${build_clover}x" = "xyesx" ])
 AM_CONDITIONAL(QPHIX_BUILD_QPX, [ test "x${build_qpx}x" = "xyesx"])
-AM_CONDITIONAL(QPHIX_MPI_SINGLESIDED, [ test "x${singlesided_mpi}x" = "xyesx"])
+AM_CONDITIONAL(QPHIX_USE_SINGLE_SIDED_COMMS, [ test "x${single-sided-comms}x" = "xyesx"])
 
 dnl dnl produce output
 AC_CONFIG_FILES(Makefile)

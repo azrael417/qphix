@@ -31,7 +31,7 @@ qphix_include_HEADERS += \
 	./print_utils.h \
 	./threadbind.h
 
-if QPHIX_MPI_SINGLESIDED
+if QPHIX_USE_SINGLE_SIDED_COMMS
 qphix_include_HEADERS += ./comm_ss.h
 else
 qphix_include_HEADERS += ./comm.h
