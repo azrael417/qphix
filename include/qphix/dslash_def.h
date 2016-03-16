@@ -3,7 +3,11 @@
 
 #include "qphix/dslash_utils.h"
 #include "qphix/geometry.h"
-#include "qphix/comm.h"
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+#include <qphix/comm_ss.h>
+#else
+#include <qphix/comm.h>
+#endif
 
 namespace QPhiX
 {

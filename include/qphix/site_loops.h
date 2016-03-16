@@ -2,7 +2,11 @@
 #define QPHIX_SITE_LOOPS_H
 
 #include <qphix/geometry.h>
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+#include <qphix/comm_ss.h>
+#else
 #include <qphix/comm.h>
+#endif
 
 #include <omp.h>
 #include "qphix/print_utils.h"

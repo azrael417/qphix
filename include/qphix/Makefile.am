@@ -31,15 +31,15 @@ qphix_include_HEADERS += \
 	./print_utils.h \
 	./threadbind.h
 
-if QPHIX_USE_SINGLE_SIDED_COMMS
-qphix_include_HEADERS += ./comm_ss.h
-else
-qphix_include_HEADERS += ./comm.h
-endif
-
 #
 # not used currently: blas.h blas_c.h blas_mic.h
 #
+
+if QPHIX_USE_SINGLE_SIDED_COMMS
+qphix_include_HEADERS += comm_ss.h
+else
+qphix_include_HEADERS += comm.h
+endif
 
 if QPHIX_BUILD_WITH_QDP
 qphix_include_HEADERS += ./qdp_packer.h

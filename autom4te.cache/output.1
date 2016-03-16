@@ -602,12 +602,12 @@ PACKAGE_BUGREPORT='bjoo@jlab.org'
 
 ac_subst_vars='LTLIBOBJS
 LIB@&t@OBJS
-QPHIX_USE_SINGLE_SIDED_COMMS_FALSE
-QPHIX_USE_SINGLE_SIDED_COMMS_TRUE
 QPHIX_BUILD_QPX_FALSE
 QPHIX_BUILD_QPX_TRUE
 QPHIX_BUILD_CLOVER_FALSE
 QPHIX_BUILD_CLOVER_TRUE
+QPHIX_USE_SINGLE_SIDED_COMMS_FALSE
+QPHIX_USE_SINGLE_SIDED_COMMS_TRUE
 QPHIX_BUILD_WITH_QDP_FALSE
 QPHIX_BUILD_WITH_QDP_TRUE
 QPHIX_PARSCALAR_FALSE
@@ -4132,7 +4132,7 @@ fi
 
 @%:@ Check whether --enable-single-sided-comms was given.
 if test "${enable_single_sided_comms+set}" = set; then
-  enableval=$enable_single_sided_comms;  USE_SINGLE_SIDED_COMMS="${enableval}" 
+  enableval=$enable_single_sided_comms;  USE_SINGLE_SIDED_COMMS=${enableval} 
 else
    USE_SINGLE_SIDED_COMMS="no" 
 
@@ -5244,9 +5244,16 @@ case ${USE_SINGLE_SIDED_COMMS} in
 yes) 
 	{ $as_echo "$as_me:$LINENO: Enabling single-sided-communication" >&5
 $as_echo "$as_me: Enabling single-sided-communication" >&6;}
-	
+	{ $as_echo "$as_me:$LINENO:  Regular QMP COMMS " >&5
+$as_echo "$as_me:  Regular QMP COMMS " >&6;}
+ 	
 cat >>confdefs.h <<_ACEOF
-@%:@define QPHIX_USE_SINGLE_SIDED_COMMS 1
+@%:@define QPHIX_DO_COMMS 1
+_ACEOF
+
+   	
+cat >>confdefs.h <<_ACEOF
+@%:@define QPHIX_QMP_COMMS 1
 _ACEOF
 
 	;;
@@ -5280,6 +5287,14 @@ else
   QPHIX_BUILD_WITH_QDP_FALSE=
 fi
 
+ if  test "X${USE_SINGLE_SIDED_COMMS}X" == "XyesX" ; then
+  QPHIX_USE_SINGLE_SIDED_COMMS_TRUE=
+  QPHIX_USE_SINGLE_SIDED_COMMS_FALSE='#'
+else
+  QPHIX_USE_SINGLE_SIDED_COMMS_TRUE='#'
+  QPHIX_USE_SINGLE_SIDED_COMMS_FALSE=
+fi
+
 
 if test "x${build_clover}x" == "xyesx";
 then
@@ -5296,7 +5311,6 @@ $as_echo "$as_me: Not Building Clover Term" >&6;}
 fi
 
 build_qpx="no"
-singlesided_mpi="no"
 
 case ${proc} in
 AVX|avx) 
@@ -5411,14 +5425,6 @@ fi
 else
   QPHIX_BUILD_QPX_TRUE='#'
   QPHIX_BUILD_QPX_FALSE=
-fi
-
- if  test "x${single-sided-comms}x" = "xyesx"; then
-  QPHIX_USE_SINGLE_SIDED_COMMS_TRUE=
-  QPHIX_USE_SINGLE_SIDED_COMMS_FALSE='#'
-else
-  QPHIX_USE_SINGLE_SIDED_COMMS_TRUE='#'
-  QPHIX_USE_SINGLE_SIDED_COMMS_FALSE=
 fi
 
 
@@ -5581,6 +5587,13 @@ $as_echo "$as_me: error: conditional \"QPHIX_BUILD_WITH_QDP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${QPHIX_USE_SINGLE_SIDED_COMMS_TRUE}" && test -z "${QPHIX_USE_SINGLE_SIDED_COMMS_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_USE_SINGLE_SIDED_COMMS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"QPHIX_USE_SINGLE_SIDED_COMMS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${QPHIX_BUILD_CLOVER_TRUE}" && test -z "${QPHIX_BUILD_CLOVER_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_BUILD_CLOVER\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -5592,13 +5605,6 @@ if test -z "${QPHIX_BUILD_QPX_TRUE}" && test -z "${QPHIX_BUILD_QPX_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_BUILD_QPX\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"QPHIX_BUILD_QPX\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${QPHIX_USE_SINGLE_SIDED_COMMS_TRUE}" && test -z "${QPHIX_USE_SINGLE_SIDED_COMMS_FALSE}"; then
-  { { $as_echo "$as_me:$LINENO: error: conditional \"QPHIX_USE_SINGLE_SIDED_COMMS\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-$as_echo "$as_me: error: conditional \"QPHIX_USE_SINGLE_SIDED_COMMS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi

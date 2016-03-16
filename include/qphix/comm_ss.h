@@ -8,8 +8,6 @@
 namespace QPhiX
 {
 
-
-
 #define QPHIX_DSLASH_MPI_TAG (12)
 
 	/*! Communicating version */
