@@ -19,8 +19,7 @@ namespace QPhiX
 		Comms(Geometry<T,V,S,compressP>* geom)  
 		{
 			//get the underlying QMP communicator
-			MPI_Comm* mpi_base_comm;
-			QMP_get_hidden_comm(QMP_comm_get_default(),reinterpret_cast<void**>(&mpi_base_comm));
+			QMP_get_hidden_comm(QMP_comm_get_default(),reinterpret_cast<void**>(&mpi_comm_base));
 			
 			
 			// Deal with the faces
@@ -120,8 +119,8 @@ namespace QPhiX
 					ALIGNED_FREE(sendToDir[2*d+1]);
 					ALIGNED_FREE(recvFromDir[2*d+0]);
 					ALIGNED_FREE(recvFromDir[2*d+1]);
-					MPI_Comm_free(commDir[2*d+0]);
-					MPI_Comm_free(commDir[2*d+1]);
+					MPI_Comm_free(&commDir[2*d+0]);
+					MPI_Comm_free(&commDir[2*d+1]);
 				}
 			}
 		}
@@ -229,6 +228,7 @@ namespace QPhiX
 		int nonLocalDir_[4];
 		
 		//communicators
+		MPI_Comm* mpi_comm_base;
 		MPI_Comm commDir[8];
 
 		void initComms(){
@@ -254,7 +254,7 @@ namespace QPhiX
 					//even first
 					color=(lcoord%2==0 ? lcoord/2 : ((lcoord+ldim-1)%ldim)/2);
 
-					MPI_Comm_split(*mpi_base_comm, color, key, &mpi_comm_tmp);
+					MPI_Comm_split(*mpi_comm_base, color, key, &mpi_comm_tmp);
 						
 					//decide whether I created up-comm or down-comm
 					if(lcoord%2==0){
@@ -270,7 +270,7 @@ namespace QPhiX
 					//odd comes next
 					color=(lcoord%2==1 ? ((lcoord+1)%ldim)/2 : lcoord/2);
 					
-					MPI_Comm_split(*mpi_base_comm, color, key, &mpi_comm_tmp);
+					MPI_Comm_split(*mpi_comm_base, color, key, &mpi_comm_tmp);
 					
 					//decide whether I created up-comm or down-comm
 					if(lcoord%2==1){
