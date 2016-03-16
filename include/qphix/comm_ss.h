@@ -78,16 +78,28 @@ namespace QPhiX
       
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
-					sendToDir[2*d+0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					sendToDir[2*d+1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					recvFromDir[2*d+0] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					recvFromDir[2*d+1] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					MPI_info info;
+					//sendToDir[2*d+0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+0], reinterpret_cast<void*>(sendToDir[2*d+0]), winSendToDir[2*d+0]);
+					//sendToDir[2*d+1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+1], reinterpret_cast<void*>(sendToDir[2*d+1]), winSendToDir[2*d+1]);
+					//recvFromDir[2*d+0] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+0], reinterpret_cast<void*>(recvFromDir[2*d+0]), winRecvFromDir[2*d+0]);
+					//recvFromDir[2*d+1] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+1], reinterpret_cast<void*>(recvFromDir[2*d+1]), winRecvFromDir[2*d+1]);
 				}
 				else {
+					//set dummy buffers
 					sendToDir[2*d+0]   = NULL;
 					sendToDir[2*d+1]   = NULL;
 					recvFromDir[2*d+0] = NULL;
 					recvFromDir[2*d+1] = NULL;
+					
+					//set dummy windows
+					winSendToDir[2*d+0]=NULL;
+					winSendToDir[2*d+1]=NULL;
+					winRecvFromDir[2*d+0]=NULL;
+					winRecvFromDir[2*d+1]=NULL;
 				}
 			} // End loop over dir
       
@@ -115,10 +127,19 @@ namespace QPhiX
 		{
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
+					//free buffers
 					ALIGNED_FREE(sendToDir[2*d+0]);
 					ALIGNED_FREE(sendToDir[2*d+1]);
 					ALIGNED_FREE(recvFromDir[2*d+0]);
 					ALIGNED_FREE(recvFromDir[2*d+1]);
+					
+					//free windows
+					MPI_Win_free(winSendToDir[2*d+0]);
+					MPI_Win_free(winSendToDir[2*d+1]);
+					MPI_Win_free(winRecvFromDir[2*d+0]);
+					MPI_Win_free(winRecvFromDir[2*d+1]);
+					
+					//free comms
 					MPI_Comm_free(&commDir[2*d+0]);
 					MPI_Comm_free(&commDir[2*d+1]);
 				}
@@ -230,6 +251,8 @@ namespace QPhiX
 		//communicators
 		MPI_Comm* mpi_comm_base;
 		MPI_Comm commDir[8];
+		MPI_Win* winSendToDir[8];
+		MPI_Win* winRecvFromDir[8];
 
 		void initComms(){
 			
