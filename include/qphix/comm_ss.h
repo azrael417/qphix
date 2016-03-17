@@ -20,7 +20,9 @@ namespace QPhiX
 		{
 			//get the underlying QMP communicator
 			QMP_get_hidden_comm(QMP_comm_get_default(),reinterpret_cast<void**>(&mpi_comm_base));
-			
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+			MPI_Info_create(&mpi_info);
+#endif
 			
 			// Deal with the faces
 			NFaceDir[0] = (geom->Ny() * geom->Nz() * geom->Nt())/2;
@@ -76,34 +78,9 @@ namespace QPhiX
 			}
 			totalBufSize *= 4; // 2 bufs for sends & 2 for recvs
       	  
-		  	//init communicators, windows and buffers
-		  	initComms();
-			for(int d = 0; d < 4; d++) {
-				if(!localDir(d)) {
-					MPI_Info info;
-					//sendToDir[2*d+0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+0], reinterpret_cast<void*>(sendToDir[2*d+0]), winSendToDir[2*d+0]);
-					//sendToDir[2*d+1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+1], reinterpret_cast<void*>(sendToDir[2*d+1]), winSendToDir[2*d+1]);
-					//recvFromDir[2*d+0] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+0], reinterpret_cast<void*>(recvFromDir[2*d+0]), winRecvFromDir[2*d+0]);
-					//recvFromDir[2*d+1] = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
-					MPI_Win_allocate(faceInBytes[d], 4096, info, commDir[2*d+1], reinterpret_cast<void*>(recvFromDir[2*d+1]), winRecvFromDir[2*d+1]);
-				}
-				else {
-					//set dummy buffers
-					sendToDir[2*d+0]   = NULL;
-					sendToDir[2*d+1]   = NULL;
-					recvFromDir[2*d+0] = NULL;
-					recvFromDir[2*d+1] = NULL;
-					
-					//set dummy windows
-					winSendToDir[2*d+0]=NULL;
-					winSendToDir[2*d+1]=NULL;
-					winRecvFromDir[2*d+0]=NULL;
-					winRecvFromDir[2*d+1]=NULL;
-				}
-			} // End loop over dir
+			//init communicators, windows and buffers
+			initComms();
+			initBuffers();
       
 			// Determine if I am minimum/maximum in the time direction in the processor grid:
 			const int* logical_dimensions = QMP_get_logical_dimensions();
@@ -128,17 +105,19 @@ namespace QPhiX
 		{
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
+					
 					//free buffers
 					ALIGNED_FREE(sendToDir[2*d+0]);
 					ALIGNED_FREE(sendToDir[2*d+1]);
 					ALIGNED_FREE(recvFromDir[2*d+0]);
 					ALIGNED_FREE(recvFromDir[2*d+1]);
 					
+#ifdef QPHIX_SINGLE_SIDED_COMMS
 					//free windows
-					MPI_Win_free(winSendToDir[2*d+0]);
-					MPI_Win_free(winSendToDir[2*d+1]);
-					MPI_Win_free(winRecvFromDir[2*d+0]);
-					MPI_Win_free(winRecvFromDir[2*d+1]);
+					MPI_Win_free(&winDir[2*d+0]);
+					MPI_Win_free(&winDir[2*d+1]);
+					MPI_Info_free(&mpi_info);
+#endif
 					
 					//free comms
 					MPI_Comm_free(&commDir[2*d+0]);
@@ -146,7 +125,6 @@ namespace QPhiX
 				}
 			}
 		}
-
 
 		inline void startSendDir(int d) {
 			/* **** MPI HERE ******* */
@@ -194,6 +172,31 @@ namespace QPhiX
 				QMP_abort(1);
 			}
 		}
+		
+		//single sided only routines
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+		inline void initPutDir(int d){
+			if(MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+				QMP_error("Init Put failed!\n");
+				QMP_abort(1);
+			}
+		}
+		
+		inline void finishPutDir(int d){
+			if(MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+				QMP_error("Finish Put failed!\n");
+				QMP_abort(1);
+			}
+		}
+		
+		inline void executePutDir(int d){
+			if (MPI_Put(&sendToDir[d],faceInBytes[d/2],MPI_BYTE,myNeighboursInDir[d],0,faceInBytes[d/2],MPI_BYTE,winDir[d]) != MPI_SUCCESS){
+				QMP_error("Put failed!\n");
+				QMP_abort(1);
+			}
+		}
+#endif
+
 
 		inline void progressComms() {
 			int flag = 0;
@@ -252,8 +255,10 @@ namespace QPhiX
 		//communicators
 		MPI_Comm* mpi_comm_base;
 		MPI_Comm commDir[8];
-		MPI_Win* winSendToDir[8];
-		MPI_Win* winRecvFromDir[8];
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+		MPI_Win winDir[8];
+		MPI_Info mpi_info;
+#endif
 
 		void initComms(){
 			
@@ -267,7 +272,7 @@ namespace QPhiX
 			
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
-					//get some params:
+					//some useful params:
 					ldim=logical_dimensions[d];
 					lcoord=logical_coordinates[d];
 					
@@ -313,7 +318,51 @@ namespace QPhiX
 			}
 		}
 		
-	};
+		void initBuffers(){
+			
+			//useful parameters
+			int ldim, lcoord;
+			
+			//get logical coordinates
+			const int* logical_dimensions = QMP_get_logical_dimensions();
+			const int* logical_coordinates = QMP_get_logical_coordinates();
+			
+			for(int d = 0; d < 4; d++) {
+				if(!localDir(d)) {
+					
+					//some useful params:
+					ldim=logical_dimensions[d];
+					lcoord=logical_coordinates[d];
+					
+					//the sendTo buffers can simply be allocated, as they do not need to be in some kind of window:
+					sendToDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					sendToDir[2*d + 1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+										
+					//do forward first on even nodes (backwards on odd nodes), then the other way round:
+					if(lcoord%2==0){
+						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
+					}
+					else{
+						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
+						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+					}
+				}
+				else {
+					//set dummy buffers
+					sendToDir[2*d+0]   = NULL;
+					sendToDir[2*d+1]   = NULL;
+					recvFromDir[2*d+0] = NULL;
+					recvFromDir[2*d+1] = NULL;
+					
+					//set dummy windows
+					winDir[2*d+0]=MPI_WIN_NULL;
+					winDir[2*d+1]=MPI_WIN_NULL;
+				}// End if local dir
+			} // End loop over dir	
+			printf("done!\n");
+		}
+	}
 
 	namespace CommsUtils {
 		void sumDouble(double* d) { QMP_sum_double(d); };

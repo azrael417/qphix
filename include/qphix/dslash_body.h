@@ -1517,9 +1517,9 @@ namespace QPhiX
 		}
 	
 		TSC_tick t_start,t_end;
-#ifdef QPHIX_DO_COMMS	
+#ifdef QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		// Pre-initiate all receives
-
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d)  ) {
 				comms->startRecvFromDir(2*d+0);   
@@ -1536,6 +1536,26 @@ namespace QPhiX
 				comms->startSendDir(2*d+0);
 			}
 		}
+#else
+		//create fence on the receiving windows
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d)  ) {
+				//open the fence
+				comms->initPutDir(2*d+0);
+				comms->initPutDir(2*d+1);
+#pragma omp parallel 
+				{
+					int tid = omp_get_thread_num();
+
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+1], cb, d, 1, 1);
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+0], cb, d, 0, 1);
+				}
+				comms->executePutDir(2*d+0);
+				comms->executePutDir(2*d+1);
+			}
+		}
+#endif
+
 #endif   // QPHIX_DO_COMMS
 
 		// DO BODY DON"T ACCUMULATE BOUNDARY
@@ -1546,6 +1566,7 @@ namespace QPhiX
 		}
 
 #ifdef  QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d) ) { 
 				comms->finishSendDir(2*d+1);
@@ -1561,6 +1582,24 @@ namespace QPhiX
 				}
 			}
 		}
+#else
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d) ) { 
+				//close the fence
+				comms->finishPutDir(2*d+0);
+				comms->finishPutDir(2*d+1);
+	    
+#pragma omp parallel 
+				{
+					int tid=omp_get_thread_num();
+	      
+					completeFaceDir(tid,comms->recvFromDir[2*d+0], res_out, u, (d==3?beta_t_b:beta_s),cb, d, 0, 1);
+					completeFaceDir(tid,comms->recvFromDir[2*d+1], res_out, u, (d==3?beta_t_f:beta_s), cb, d, 1, 1);	
+				}
+			} // end if
+		} // end for
+#endif
+
 #endif	// QPHIX_DO_COMMS
 	
 	}  
@@ -1583,7 +1622,8 @@ namespace QPhiX
 		}
 
 		TSC_tick t_start,t_end;
-#ifdef QPHIX_DO_COMMS	
+#ifdef QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		// Pre-initiate all receives
 
 		for(int d = 3; d >= 0; d--) {
@@ -1602,6 +1642,26 @@ namespace QPhiX
 				comms->startSendDir(2*d+0);
 			}
 		}
+#else
+		//create fence on the receiving windows
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d)  ) {
+				//open the fence
+				comms->initPutDir(2*d+0);
+				comms->initPutDir(2*d+1);
+#pragma omp parallel 
+				{
+					int tid = omp_get_thread_num();
+
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+1], cb, d, 1, 0);
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+0], cb, d, 0, 0);
+				}
+				comms->executePutDir(2*d+0);
+				comms->executePutDir(2*d+1);
+			}
+		}
+#endif	
+
 #endif   // QPHIX_DO_COMMS
 
 
@@ -1612,6 +1672,7 @@ namespace QPhiX
 		}
 
 #ifdef  QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d) ) { 
 				comms->finishSendDir(2*d+1);
@@ -1628,7 +1689,24 @@ namespace QPhiX
 				}
 			} // end if
 		} // end for
-
+#else
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d) ) { 
+				//close the fence
+				comms->finishPutDir(2*d+0);
+				comms->finishPutDir(2*d+1);
+	    
+#pragma omp parallel 
+				{
+					int tid=omp_get_thread_num();
+	      
+					completeFaceDir(tid,comms->recvFromDir[2*d+0], res_out, u, (d==3?beta_t_b:beta_s),cb, d, 0, 0);
+					completeFaceDir(tid,comms->recvFromDir[2*d+1], res_out, u, (d==3?beta_t_f:beta_s), cb, d, 1, 0);	
+				}
+			} // end if
+		} // end for
+#endif
+		
 #endif	// QPHIX_DO_COMMS
 	}  // function
 
@@ -1656,12 +1734,12 @@ namespace QPhiX
 			beta_t_f *= t_boundary;
 		}
 
-#ifdef QPHIX_DO_COMMS	
+#ifdef QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		// Pre-initiate all receives
-
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d)  ) {
-				comms->startRecvFromDir(2*d+0);   
+				comms->startRecvFromDir(2*d+0);
 				comms->startRecvFromDir(2*d+1);
 
 #pragma omp parallel 
@@ -1675,6 +1753,26 @@ namespace QPhiX
 				comms->startSendDir(2*d+0);
 			}
 		}
+#else
+		//create fence on the receiving windows
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d)  ) {
+				//open the fence
+				comms->initPutDir(2*d+0);
+				comms->initPutDir(2*d+1);
+#pragma omp parallel 
+				{
+					int tid = omp_get_thread_num();
+
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+1], cb, d, 1, 1);
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+0], cb, d, 0, 1);
+				}
+				comms->executePutDir(2*d+0);
+				comms->executePutDir(2*d+1);
+			}
+		}
+#endif
+		
 #endif   // QPHIX_DO_COMMS
 
 
@@ -1685,6 +1783,7 @@ namespace QPhiX
 		}
 
 #ifdef  QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d) ) { 
 				comms->finishSendDir(2*d+1);
@@ -1701,6 +1800,24 @@ namespace QPhiX
 				}
 			} // end if
 		} // end for
+#else
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d) ) { 
+				//close the fence
+				comms->finishPutDir(2*d+0);
+				comms->finishPutDir(2*d+1);
+	    
+#pragma omp parallel 
+				{
+					int tid=omp_get_thread_num();
+	      
+					completeFaceDir(tid,comms->recvFromDir[2*d+0], res_out, u, (d==3?beta_t_b:beta_s),cb, d, 0, 1);
+					completeFaceDir(tid,comms->recvFromDir[2*d+1], res_out, u, (d==3?beta_t_f:beta_s), cb, d, 1, 1);	
+				}
+			} // end if
+		} // end for
+#endif
+		
 #endif	// QPHIX_DO_COMMS
 
 	}
@@ -1726,7 +1843,8 @@ namespace QPhiX
 			beta_t_f *= t_boundary;
 		}
 
-#ifdef QPHIX_DO_COMMS	
+#ifdef QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		// Pre-initiate all receives
 
 		for(int d = 3; d >= 0; d--) {
@@ -1745,6 +1863,26 @@ namespace QPhiX
 				comms->startSendDir(2*d+0);
 			}
 		}
+#else
+		//create fence on the receiving windows
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d)  ) {
+				//open the fence
+				comms->initPutDir(2*d+0);
+				comms->initPutDir(2*d+1);
+#pragma omp parallel 
+				{
+					int tid = omp_get_thread_num();
+
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+1], cb, d, 1, 0);
+					packFaceDir(tid, psi_in, comms->sendToDir[2*d+0], cb, d, 0, 0);
+				}
+				comms->executePutDir(2*d+0);
+				comms->executePutDir(2*d+1);
+			}
+		}
+#endif
+		
 #endif   // QPHIX_DO_COMMS
 
 
@@ -1755,6 +1893,7 @@ namespace QPhiX
 		}
 
 #ifdef  QPHIX_DO_COMMS
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 		for(int d = 3; d >= 0; d--) {
 			if( ! comms->localDir(d) ) { 
 				comms->finishSendDir(2*d+1);
@@ -1771,7 +1910,24 @@ namespace QPhiX
 				}
 			} // end if
 		} // end for
-
+#else
+		for(int d = 3; d >= 0; d--) {
+			if( ! comms->localDir(d) ) { 
+				//close the fence
+				comms->finishPutDir(2*d+0);
+				comms->finishPutDir(2*d+1);
+	    
+#pragma omp parallel 
+				{
+					int tid=omp_get_thread_num();
+	      
+					completeFaceDir(tid,comms->recvFromDir[2*d+0], res_out, u, (d==3?beta_t_b:beta_s),cb, d, 0, 0);
+					completeFaceDir(tid,comms->recvFromDir[2*d+1], res_out, u, (d==3?beta_t_f:beta_s), cb, d, 1, 0);	
+				}
+			} // end if
+		} // end for
+#endif
+		
 #endif	// QPHIX_DO_COMMS
 
 	}
