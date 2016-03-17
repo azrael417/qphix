@@ -24,6 +24,12 @@ namespace QPhiX
 			MPI_Info_create(&mpi_info);
 #endif
 			
+			//topology information
+			for(unsigned int i=0; i<4; i++){
+				logical_dimensions[i]=QMP_get_logical_dimensions()[i];
+				logical_coordinates[i]=QMP_get_logical_coordinates()[i];
+			}
+			
 			// Deal with the faces
 			NFaceDir[0] = (geom->Ny() * geom->Nz() * geom->Nt())/2;
 			NFaceDir[1] = (geom->Nx() * geom->Nz() * geom->Nt())/2;
@@ -35,16 +41,14 @@ namespace QPhiX
 			// We have QMP
 			// Decide which directions are local by appealing to 
 			// QMP geometry
-			const int* machine_size = QMP_get_logical_dimensions();
 			if( QMP_get_logical_number_of_dimensions() != 4 ) {
 				QMP_error("Number of QMP logical dimensions must be 4");
 				QMP_abort(1);
 			}
 
 
-      
 			for(int d = 0; d < 4; d++) {
-				if( machine_size[d] > 1 ){
+				if( logical_dimensions[d] > 1 ){
 					localDir_[d] = false;
 				}
 				else {
@@ -83,9 +87,6 @@ namespace QPhiX
 			initBuffers();
       
 			// Determine if I am minimum/maximum in the time direction in the processor grid:
-			const int* logical_dimensions = QMP_get_logical_dimensions();
-			const int* logical_coordinates = QMP_get_logical_coordinates();
-      
 			amIPtMin_ = (logical_coordinates[3] == 0);
 			amIPtMax_ = (logical_coordinates[3] == (logical_dimensions[3]-1) );
 
@@ -109,13 +110,19 @@ namespace QPhiX
 					//free buffers
 					ALIGNED_FREE(sendToDir[2*d+0]);
 					ALIGNED_FREE(sendToDir[2*d+1]);
+#ifndef QPHIX_USE_SINGLE_SIDED_COMMS
 					ALIGNED_FREE(recvFromDir[2*d+0]);
 					ALIGNED_FREE(recvFromDir[2*d+1]);
-					
-#ifdef QPHIX_SINGLE_SIDED_COMMS
+#else
 					//free windows
-					MPI_Win_free(&winDir[2*d+0]);
-					MPI_Win_free(&winDir[2*d+1]);
+					if(logical_coordinates[d]%2==0){
+						MPI_Win_free(&winDir[2*d+0]);
+						MPI_Win_free(&winDir[2*d+1]);
+					}
+					else{
+						MPI_Win_free(&winDir[2*d+1]);
+						MPI_Win_free(&winDir[2*d+0]);
+					}
 					MPI_Info_free(&mpi_info);
 #endif
 					
@@ -175,15 +182,21 @@ namespace QPhiX
 		
 		//single sided only routines
 #ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+		inline int oppDir(int d){
+			return d+1-2*(d%2);
+		}
+		
 		inline void initPutDir(int d){
-			if(MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+			int deff=(logical_coordinates[d/2]%2==0 ? d : oppDir(d));
+			if (MPI_Win_fence(0, winDir[deff]) != MPI_SUCCESS){
 				QMP_error("Init Put failed!\n");
 				QMP_abort(1);
 			}
 		}
 		
 		inline void finishPutDir(int d){
-			if(MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+			int deff=(logical_coordinates[d/2]%2==0 ? d : oppDir(d));
+			if( MPI_Win_fence(0, winDir[deff]) != MPI_SUCCESS){
 				QMP_error("Finish Put failed!\n");
 				QMP_abort(1);
 			}
@@ -251,6 +264,8 @@ namespace QPhiX
 		bool amIPtMax_;
 		int numNonLocalDir_;
 		int nonLocalDir_[4];
+		int logical_dimensions[4];
+		int logical_coordinates[4];
 		
 		//communicators
 		MPI_Comm* mpi_comm_base;
@@ -265,10 +280,6 @@ namespace QPhiX
 			//some global variables
 			MPI_Comm mpi_comm_tmp;
 			int key, color, ldim, lcoord;
-			
-			//get logical coordinates
-			const int* logical_dimensions = QMP_get_logical_dimensions();
-			const int* logical_coordinates = QMP_get_logical_coordinates();
 			
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
@@ -323,10 +334,6 @@ namespace QPhiX
 			//useful parameters
 			int ldim, lcoord;
 			
-			//get logical coordinates
-			const int* logical_dimensions = QMP_get_logical_dimensions();
-			const int* logical_coordinates = QMP_get_logical_coordinates();
-			
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
 					
@@ -337,15 +344,17 @@ namespace QPhiX
 					//the sendTo buffers can simply be allocated, as they do not need to be in some kind of window:
 					sendToDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					sendToDir[2*d + 1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					//recvFromDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
+					//recvFromDir[2*d + 1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 										
 					//do forward first on even nodes (backwards on odd nodes), then the other way round:
 					if(lcoord%2==0){
-						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
-						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
+						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
 					}
 					else{
-						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
-						MPI_Win_allocate(faceInBytes[d], 4096, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
+						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
 					}
 				}
 				else {
@@ -360,9 +369,8 @@ namespace QPhiX
 					winDir[2*d+1]=MPI_WIN_NULL;
 				}// End if local dir
 			} // End loop over dir	
-			printf("done!\n");
 		}
-	}
+	};
 
 	namespace CommsUtils {
 		void sumDouble(double* d) { QMP_sum_double(d); };
