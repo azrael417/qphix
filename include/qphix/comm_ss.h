@@ -83,7 +83,6 @@ namespace QPhiX
 			totalBufSize *= 4; // 2 bufs for sends & 2 for recvs
       	  
 			//init communicators, windows and buffers
-			initComms();
 			initBuffers();
       
 			// Determine if I am minimum/maximum in the time direction in the processor grid:
@@ -115,27 +114,19 @@ namespace QPhiX
 					ALIGNED_FREE(recvFromDir[2*d+1]);
 #else
 					//free windows
-					if(logical_coordinates[d]%2==0){
-						MPI_Win_free(&winDir[2*d+0]);
-						MPI_Win_free(&winDir[2*d+1]);
-					}
-					else{
-						MPI_Win_free(&winDir[2*d+1]);
-						MPI_Win_free(&winDir[2*d+0]);
-					}
+					MPI_Win_free(&winDir[2*d+0]);
+					MPI_Win_free(&winDir[2*d+1]);
+					
+					//Free info param
 					MPI_Info_free(&mpi_info);
 #endif
-					
-					//free comms
-					MPI_Comm_free(&commDir[2*d+0]);
-					MPI_Comm_free(&commDir[2*d+1]);
 				}
 			}
 		}
 
 		inline void startSendDir(int d) {
 			/* **** MPI HERE ******* */
-			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, commDir[d], &reqSendToDir[d] ) != MPI_SUCCESS ) { 
+			if (  MPI_Isend( (void *)sendToDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d],  QPHIX_DSLASH_MPI_TAG, *mpi_comm_base, &reqSendToDir[d] ) != MPI_SUCCESS ) { 
 				QMP_error("Failed to start send in forward T direction\n");
 				QMP_abort(1);
 			}
@@ -159,7 +150,7 @@ namespace QPhiX
 
 		inline void startRecvFromDir(int d) { 
 			/* **** MPI HERE ******* */
-			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, commDir[d], &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
+			if ( MPI_Irecv((void *)recvFromDir[d], faceInBytes[d/2], MPI_BYTE, myNeighboursInDir[d], QPHIX_DSLASH_MPI_TAG, *mpi_comm_base, &reqRecvFromDir[d]) != MPI_SUCCESS ) { 
 				QMP_error("Recv from dir failed\n");
 				QMP_abort(1);
 			}
@@ -187,16 +178,14 @@ namespace QPhiX
 		}
 		
 		inline void initPutDir(int d){
-			int deff=(logical_coordinates[d/2]%2==0 ? d : oppDir(d));
-			if (MPI_Win_fence(0, winDir[deff]) != MPI_SUCCESS){
+			if (MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Init Put failed!\n");
 				QMP_abort(1);
 			}
 		}
 		
 		inline void finishPutDir(int d){
-			int deff=(logical_coordinates[d/2]%2==0 ? d : oppDir(d));
-			if( MPI_Win_fence(0, winDir[deff]) != MPI_SUCCESS){
+			if( MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Finish Put failed!\n");
 				QMP_abort(1);
 			}
@@ -269,65 +258,11 @@ namespace QPhiX
 		
 		//communicators
 		MPI_Comm* mpi_comm_base;
-		MPI_Comm commDir[8];
 #ifdef QPHIX_USE_SINGLE_SIDED_COMMS
 		MPI_Win winDir[8];
 		MPI_Info mpi_info;
 #endif
-
-		void initComms(){
-			
-			//some global variables
-			MPI_Comm mpi_comm_tmp;
-			int key, color, ldim, lcoord;
-			
-			for(int d = 0; d < 4; d++) {
-				if(!localDir(d)) {
-					//some useful params:
-					ldim=logical_dimensions[d];
-					lcoord=logical_coordinates[d];
-					
-					//key is simply my rank
-					key=myRank;
-					
-					
-					//even first
-					color=(lcoord%2==0 ? lcoord/2 : ((lcoord+ldim-1)%ldim)/2);
-
-					MPI_Comm_split(*mpi_comm_base, color, key, &mpi_comm_tmp);
-						
-					//decide whether I created up-comm or down-comm
-					if(lcoord%2==0){
-						//this is the comm in plus direction
-						commDir[2*d + 1]=mpi_comm_tmp;
-					}
-					else{
-						//this is the comm in minus direction
-						commDir[2*d + 0]=mpi_comm_tmp;
-					}
-					
-					
-					//odd comes next
-					color=(lcoord%2==1 ? ((lcoord+1)%ldim)/2 : lcoord/2);
-					
-					MPI_Comm_split(*mpi_comm_base, color, key, &mpi_comm_tmp);
-					
-					//decide whether I created up-comm or down-comm
-					if(lcoord%2==1){
-						//this is the comm in plus direction
-						commDir[2*d + 1]=mpi_comm_tmp;
-					}
-					else{
-						//this is the comm in minus direction
-						commDir[2*d + 0]=mpi_comm_tmp;
-					}
-				}
-				else{
-					commDir[2*d + 0]=MPI_COMM_NULL;
-					commDir[2*d + 1]=MPI_COMM_NULL;
-				}
-			}
-		}
+		
 		
 		void initBuffers(){
 			
@@ -347,15 +282,9 @@ namespace QPhiX
 					//recvFromDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					//recvFromDir[2*d + 1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 										
-					//do forward first on even nodes (backwards on odd nodes), then the other way round:
-					if(lcoord%2==0){
-						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
-						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
-					}
-					else{
-						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 0], reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
-						MPI_Win_allocate(faceInBytes[d], 1, mpi_info, commDir[2*d + 1], reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
-					}
+					//do forward and backward windows
+					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
+					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
 				}
 				else {
 					//set dummy buffers
