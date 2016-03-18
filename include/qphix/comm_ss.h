@@ -3,6 +3,11 @@
 
 #include <qmp.h>
 #include <mpi.h>
+#include <queue>
+
+//DEBUG
+#include <sstream>
+//DEBUG
 
 
 #warning "Using single sided communications"
@@ -113,6 +118,10 @@ namespace QPhiX
 					ALIGNED_FREE(recvFromDir[2*d+0]);
 					ALIGNED_FREE(recvFromDir[2*d+1]);
 #else
+					//unlock windows
+					//unlockDir(2*d+0);
+					//unlockDir(2*d+1);
+					
 					//free windows
 					MPI_Win_free(&winDir[2*d+0]);
 					MPI_Win_free(&winDir[2*d+1]);
@@ -171,10 +180,45 @@ namespace QPhiX
 			}
 		}
 		
+		//test if sent/received is completed
+		inline bool testSendToDir(int d){
+			bool flag;
+			if( MPI_Test(reqSendToDir[d], &flag, NULL) != MPI_SUCCESS){
+				QMP_error("Wait on recv from dir failed\n");
+				QMP_abort(1);
+			}
+			return flag;
+		}
+		
+		inline bool testRecvFromDir(int d){
+			bool flag;
+			if( MPI_Test(reqRecvFromDir[d], &flag, NULL) != MPI_SUCCESS){
+				QMP_error("Wait on recv from dir failed\n");
+				QMP_abort(1);
+			}
+			return flag;
+		}
+		
+		
+		
 		//single sided only routines
 #ifdef QPHIX_USE_SINGLE_SIDED_COMMS
 		inline int oppDir(int d){
 			return d+1-2*(d%2);
+		}
+		
+		inline void lockDir(int d){
+			if (MPI_Win_lock_all(0, winDir[d]) != MPI_SUCCESS){
+				QMP_error("Win-lock failed!\n");
+				QMP_abort(1);
+			}
+		}
+		
+		inline void unlockDir(int d){
+			if (MPI_Win_unlock_all(winDir[d]) != MPI_SUCCESS){
+				QMP_error("Win-unlock failed!\n");
+				QMP_abort(1);
+			}
 		}
 		
 		inline void initPutDir(int d){
@@ -185,6 +229,10 @@ namespace QPhiX
 		}
 		
 		inline void finishPutDir(int d){
+			//if( MPI_Win_flush(myNeighboursInDir[d], winDir[d]) != MPI_SUCCESS){
+			//	QMP_error("Finish Put failed!\n");
+			//	QMP_abort(1);
+			//}
 			if( MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Finish Put failed!\n");
 				QMP_abort(1);
@@ -205,6 +253,11 @@ namespace QPhiX
 			MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, *mpi_base_comm, &flag, MPI_STATUS_IGNORE);
 		}
 
+		//debug
+		inline   int  getMyRank() const { return myRank; }
+		inline   int  getFaceSize(int d) const { return faceInBytes[d]; }
+		//debug
+		
 		inline   bool localX() const { return localDir_[0]; }
 		inline   bool localY() const { return localDir_[1]; }
 
@@ -237,6 +290,7 @@ namespace QPhiX
 		// Ranks of the neighbours in the Y, Z and T directions
 		int myRank;
 		int myNeighboursInDir[8];
+		queue<int> commqueue;
     
 		unsigned int faceInBytes[4];
 		size_t totalBufSize;
@@ -285,6 +339,10 @@ namespace QPhiX
 					//do forward and backward windows
 					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
 					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+					
+					//lock dirs:
+					//lockDir(2*d+0);
+					//lockDir(2*d+1);
 				}
 				else {
 					//set dummy buffers
