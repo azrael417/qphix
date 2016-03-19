@@ -108,6 +108,10 @@ namespace QPhiX
 
 		~Comms(void)
 		{
+#ifdef QPHIX_USE_SINGLE_SIDED_COMMS
+		  //Free info handle                                                                                                               
+		  MPI_Info_free(&mpi_info);
+#endif
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
 					
@@ -125,9 +129,7 @@ namespace QPhiX
 					//free windows
 					MPI_Win_free(&winDir[2*d+0]);
 					MPI_Win_free(&winDir[2*d+1]);
-					
-					//Free info param
-					MPI_Info_free(&mpi_info);
+
 #endif
 				}
 			}
