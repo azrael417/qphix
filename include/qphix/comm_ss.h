@@ -222,14 +222,14 @@ namespace QPhiX
 		}
 		
 		inline void initPutDir(int d){
-			if (MPI_Win_fence(MPI_NOPRECEDE, winDir[d]) != MPI_SUCCESS){
+			if (MPI_Win_fence(MPI_MODE_NOPRECEDE, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Init Put failed!\n");
 				QMP_abort(1);
 			}
 		}
 		
 		inline void finishPutDir(int d){
-			if( MPI_Win_fence(MPI_NOSUCCEED, winDir[d]) != MPI_SUCCESS){
+			if( MPI_Win_fence(MPI_MODE_NOSUCCEED, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Finish Put failed!\n");
 				QMP_abort(1);
 			}
