@@ -182,21 +182,21 @@ namespace QPhiX
 		
 		//test if sent/received is completed
 		inline bool testSendToDir(int d){
-			bool flag;
-			if( MPI_Test(reqSendToDir[d], &flag, NULL) != MPI_SUCCESS){
+			int iflag;
+			if( MPI_Test(reqSendToDir[d], &iflag, NULL) != MPI_SUCCESS){
 				QMP_error("Wait on recv from dir failed\n");
 				QMP_abort(1);
 			}
-			return flag;
+			return static_cast<bool>(iflag);
 		}
 		
 		inline bool testRecvFromDir(int d){
-			bool flag;
-			if( MPI_Test(reqRecvFromDir[d], &flag, NULL) != MPI_SUCCESS){
+			int iflag;
+			if( MPI_Test(reqRecvFromDir[d], &iflag, NULL) != MPI_SUCCESS){
 				QMP_error("Wait on recv from dir failed\n");
 				QMP_abort(1);
 			}
-			return flag;
+			return static_cast<bool>(iflag);
 		}
 		
 		
@@ -222,25 +222,21 @@ namespace QPhiX
 		}
 		
 		inline void initPutDir(int d){
-			if (MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+			if (MPI_Win_fence(MPI_NOPRECEDE, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Init Put failed!\n");
 				QMP_abort(1);
 			}
 		}
 		
 		inline void finishPutDir(int d){
-			//if( MPI_Win_flush(myNeighboursInDir[d], winDir[d]) != MPI_SUCCESS){
-			//	QMP_error("Finish Put failed!\n");
-			//	QMP_abort(1);
-			//}
-			if( MPI_Win_fence(0, winDir[d]) != MPI_SUCCESS){
+			if( MPI_Win_fence(MPI_NOSUCCEED, winDir[d]) != MPI_SUCCESS){
 				QMP_error("Finish Put failed!\n");
 				QMP_abort(1);
 			}
 		}
 		
 		inline void executePutDir(int d){
-			if (MPI_Put(&sendToDir[d],faceInBytes[d/2],MPI_BYTE,myNeighboursInDir[d],0,faceInBytes[d/2],MPI_BYTE,winDir[d]) != MPI_SUCCESS){
+			if (MPI_Put(reinterpret_cast<void*>(sendToDir[d]),faceInBytes[d/2],MPI_BYTE,myNeighboursInDir[d],0,faceInBytes[d/2],MPI_BYTE,winDir[d]) != MPI_SUCCESS){
 				QMP_error("Put failed!\n");
 				QMP_abort(1);
 			}
@@ -284,13 +280,13 @@ namespace QPhiX
     
 		T* sendToDir[8]; // Send Buffers
 		T* recvFromDir[8]; // Recv Buffers
+		queue<int> queue; //communication queue
 
 	private:
     
 		// Ranks of the neighbours in the Y, Z and T directions
 		int myRank;
 		int myNeighboursInDir[8];
-		queue<int> commqueue;
     
 		unsigned int faceInBytes[4];
 		size_t totalBufSize;
@@ -320,15 +316,8 @@ namespace QPhiX
 		
 		void initBuffers(){
 			
-			//useful parameters
-			int ldim, lcoord;
-			
 			for(int d = 0; d < 4; d++) {
 				if(!localDir(d)) {
-					
-					//some useful params:
-					ldim=logical_dimensions[d];
-					lcoord=logical_coordinates[d];
 					
 					//the sendTo buffers can simply be allocated, as they do not need to be in some kind of window:
 					sendToDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
@@ -336,9 +325,10 @@ namespace QPhiX
 					//recvFromDir[2*d + 0]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 					//recvFromDir[2*d + 1]   = (T*)ALIGNED_MALLOC(faceInBytes[d], 4096);
 										
-					//do forward and backward windows
-					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 0]);
-					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 1]);
+					//do forward and backward windows: the buffers needs to be swapped relative to the windows, as passing data to 2*d+1
+					//will make the data in 2*d+0 available.
+					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 1]), &winDir[2*d + 0]);
+					MPI_Win_allocate(faceInBytes[d], 1, mpi_info, *mpi_comm_base, reinterpret_cast<void**>(&recvFromDir[2*d + 0]), &winDir[2*d + 1]);
 					
 					//lock dirs:
 					//lockDir(2*d+0);
