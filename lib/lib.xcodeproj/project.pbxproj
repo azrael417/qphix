@@ -1,0 +1,142 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		B5873E181D76280B008DC068 /* bgq_threadbind.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = bgq_threadbind.cc; sourceTree = "<group>"; };
+		B5873E191D76280B008DC068 /* generic_threadbind.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = generic_threadbind.cc; sourceTree = "<group>"; };
+		B5873E1A1D76280B008DC068 /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		B5873E1B1D76280B008DC068 /* print_utils.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = print_utils.cc; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		B5873E121D76280B008DC068 = {
+			isa = PBXGroup;
+			children = (
+				B5873E181D76280B008DC068 /* bgq_threadbind.cc */,
+				B5873E191D76280B008DC068 /* generic_threadbind.cc */,
+				B5873E1A1D76280B008DC068 /* Makefile.am */,
+				B5873E1B1D76280B008DC068 /* print_utils.cc */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		B5873E171D76280B008DC068 /* lib */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = B5873E1C1D76280B008DC068 /* Build configuration list for PBXLegacyTarget "lib" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/tkurth/Dropbox/Documents/NERSC/NESAP/github/qphix-source/lib";
+			dependencies = (
+			);
+			name = lib;
+			passBuildSettingsInEnvironment = 1;
+			productName = lib;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		B5873E131D76280B008DC068 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = B5873E161D76280B008DC068 /* Build configuration list for PBXProject "lib" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B5873E121D76280B008DC068;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B5873E171D76280B008DC068 /* lib */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		B5873E141D76280B008DC068 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		B5873E151D76280B008DC068 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		B5873E1D1D76280B008DC068 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = lib;
+			};
+			name = Debug;
+		};
+		B5873E1E1D76280B008DC068 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = lib;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B5873E161D76280B008DC068 /* Build configuration list for PBXProject "lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5873E141D76280B008DC068 /* Debug */,
+				B5873E151D76280B008DC068 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5873E1C1D76280B008DC068 /* Build configuration list for PBXLegacyTarget "lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5873E1D1D76280B008DC068 /* Debug */,
+				B5873E1E1D76280B008DC068 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B5873E131D76280B008DC068 /* Project object */;
+}

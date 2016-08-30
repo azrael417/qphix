@@ -1,0 +1,198 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXFileReference section */
+		B5873E251D76280B008DC068 /* clover_fermact_params_w.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = clover_fermact_params_w.h; sourceTree = "<group>"; };
+		B5873E261D76280B008DC068 /* clover_term_qdp_w.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = clover_term_qdp_w.h; sourceTree = "<group>"; };
+		B5873E271D76280B008DC068 /* dslashm_w.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = dslashm_w.cc; sourceTree = "<group>"; };
+		B5873E281D76280B008DC068 /* dslashm_w.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = dslashm_w.h; sourceTree = "<group>"; };
+		B5873E291D76280B008DC068 /* invbicgstab_test.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = invbicgstab_test.h; sourceTree = "<group>"; };
+		B5873E2A1D76280B008DC068 /* Makefile.am */ = {isa = PBXFileReference; lastKnownFileType = text; path = Makefile.am; sourceTree = "<group>"; };
+		B5873E2B1D76280B008DC068 /* mesfield.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = mesfield.cc; sourceTree = "<group>"; };
+		B5873E2C1D76280B008DC068 /* mesfield.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mesfield.h; sourceTree = "<group>"; };
+		B5873E2D1D76280B008DC068 /* reunit.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = reunit.cc; sourceTree = "<group>"; };
+		B5873E2E1D76280B008DC068 /* reunit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = reunit.h; sourceTree = "<group>"; };
+		B5873E2F1D76280B008DC068 /* t_clov_dslash.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = t_clov_dslash.cc; sourceTree = "<group>"; };
+		B5873E301D76280B008DC068 /* t_clov_invert_from_file.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = t_clov_invert_from_file.cc; sourceTree = "<group>"; };
+		B5873E311D76280B008DC068 /* t_dslash.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = t_dslash.cc; sourceTree = "<group>"; };
+		B5873E321D76280B008DC068 /* t_minvcg.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = t_minvcg.cc; sourceTree = "<group>"; };
+		B5873E331D76280B008DC068 /* test_blas.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = test_blas.cc; sourceTree = "<group>"; };
+		B5873E341D76280B008DC068 /* testBlas.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testBlas.cc; sourceTree = "<group>"; };
+		B5873E351D76280B008DC068 /* testBlas.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testBlas.h; sourceTree = "<group>"; };
+		B5873E361D76280B008DC068 /* testClovDslashFull.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testClovDslashFull.cc; sourceTree = "<group>"; };
+		B5873E371D76280B008DC068 /* testClovDslashFull.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testClovDslashFull.h; sourceTree = "<group>"; };
+		B5873E381D76280B008DC068 /* testClovInvertFromFile.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testClovInvertFromFile.cc; sourceTree = "<group>"; };
+		B5873E391D76280B008DC068 /* testClovInvertFromFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testClovInvertFromFile.h; sourceTree = "<group>"; };
+		B5873E3A1D76280B008DC068 /* testDslashFull.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testDslashFull.cc; sourceTree = "<group>"; };
+		B5873E3B1D76280B008DC068 /* testDslashFull.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testDslashFull.h; sourceTree = "<group>"; };
+		B5873E3C1D76280B008DC068 /* testMInvCG.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = testMInvCG.cc; sourceTree = "<group>"; };
+		B5873E3D1D76280B008DC068 /* testMInvCG.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = testMInvCG.h; sourceTree = "<group>"; };
+		B5873E3E1D76280B008DC068 /* time_clov_noqdp.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = time_clov_noqdp.cc; sourceTree = "<group>"; };
+		B5873E3F1D76280B008DC068 /* time_dslash_noqdp.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = time_dslash_noqdp.cc; sourceTree = "<group>"; };
+		B5873E401D76280B008DC068 /* timeClovNoQDP.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timeClovNoQDP.cc; sourceTree = "<group>"; };
+		B5873E411D76280B008DC068 /* timeClovNoQDP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timeClovNoQDP.h; sourceTree = "<group>"; };
+		B5873E421D76280B008DC068 /* timeDslashNoQDP.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = timeDslashNoQDP.cc; sourceTree = "<group>"; };
+		B5873E431D76280B008DC068 /* timeDslashNoQDP.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = timeDslashNoQDP.h; sourceTree = "<group>"; };
+		B5873E441D76280B008DC068 /* unittest.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unittest.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		B5873E1F1D76280B008DC068 = {
+			isa = PBXGroup;
+			children = (
+				B5873E251D76280B008DC068 /* clover_fermact_params_w.h */,
+				B5873E261D76280B008DC068 /* clover_term_qdp_w.h */,
+				B5873E271D76280B008DC068 /* dslashm_w.cc */,
+				B5873E281D76280B008DC068 /* dslashm_w.h */,
+				B5873E291D76280B008DC068 /* invbicgstab_test.h */,
+				B5873E2A1D76280B008DC068 /* Makefile.am */,
+				B5873E2B1D76280B008DC068 /* mesfield.cc */,
+				B5873E2C1D76280B008DC068 /* mesfield.h */,
+				B5873E2D1D76280B008DC068 /* reunit.cc */,
+				B5873E2E1D76280B008DC068 /* reunit.h */,
+				B5873E2F1D76280B008DC068 /* t_clov_dslash.cc */,
+				B5873E301D76280B008DC068 /* t_clov_invert_from_file.cc */,
+				B5873E311D76280B008DC068 /* t_dslash.cc */,
+				B5873E321D76280B008DC068 /* t_minvcg.cc */,
+				B5873E331D76280B008DC068 /* test_blas.cc */,
+				B5873E341D76280B008DC068 /* testBlas.cc */,
+				B5873E351D76280B008DC068 /* testBlas.h */,
+				B5873E361D76280B008DC068 /* testClovDslashFull.cc */,
+				B5873E371D76280B008DC068 /* testClovDslashFull.h */,
+				B5873E381D76280B008DC068 /* testClovInvertFromFile.cc */,
+				B5873E391D76280B008DC068 /* testClovInvertFromFile.h */,
+				B5873E3A1D76280B008DC068 /* testDslashFull.cc */,
+				B5873E3B1D76280B008DC068 /* testDslashFull.h */,
+				B5873E3C1D76280B008DC068 /* testMInvCG.cc */,
+				B5873E3D1D76280B008DC068 /* testMInvCG.h */,
+				B5873E3E1D76280B008DC068 /* time_clov_noqdp.cc */,
+				B5873E3F1D76280B008DC068 /* time_dslash_noqdp.cc */,
+				B5873E401D76280B008DC068 /* timeClovNoQDP.cc */,
+				B5873E411D76280B008DC068 /* timeClovNoQDP.h */,
+				B5873E421D76280B008DC068 /* timeDslashNoQDP.cc */,
+				B5873E431D76280B008DC068 /* timeDslashNoQDP.h */,
+				B5873E441D76280B008DC068 /* unittest.h */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXLegacyTarget section */
+		B5873E241D76280B008DC068 /* tests */ = {
+			isa = PBXLegacyTarget;
+			buildArgumentsString = "$(ACTION)";
+			buildConfigurationList = B5873E451D76280B008DC068 /* Build configuration list for PBXLegacyTarget "tests" */;
+			buildPhases = (
+			);
+			buildToolPath = /usr/bin/make;
+			buildWorkingDirectory = "/Users/tkurth/Dropbox/Documents/NERSC/NESAP/github/qphix-source/tests";
+			dependencies = (
+			);
+			name = tests;
+			passBuildSettingsInEnvironment = 1;
+			productName = tests;
+		};
+/* End PBXLegacyTarget section */
+
+/* Begin PBXProject section */
+		B5873E201D76280B008DC068 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+			};
+			buildConfigurationList = B5873E231D76280B008DC068 /* Build configuration list for PBXProject "tests" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = B5873E1F1D76280B008DC068;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				B5873E241D76280B008DC068 /* tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		B5873E211D76280B008DC068 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		B5873E221D76280B008DC068 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				COPY_PHASE_STRIP = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		B5873E461D76280B008DC068 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEBUGGING_SYMBOLS = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = tests;
+			};
+			name = Debug;
+		};
+		B5873E471D76280B008DC068 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				OTHER_CFLAGS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = tests;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B5873E231D76280B008DC068 /* Build configuration list for PBXProject "tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5873E211D76280B008DC068 /* Debug */,
+				B5873E221D76280B008DC068 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B5873E451D76280B008DC068 /* Build configuration list for PBXLegacyTarget "tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B5873E461D76280B008DC068 /* Debug */,
+				B5873E471D76280B008DC068 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = B5873E201D76280B008DC068 /* Project object */;
+}
